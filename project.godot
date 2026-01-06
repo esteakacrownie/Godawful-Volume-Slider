@@ -15,6 +15,11 @@ run/main_scene="uid://8syvpkaex1rm"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
+[display]
+
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep_height"
+
 [input]
 
 move_left={
