@@ -10,3 +10,5 @@
 > https://github.com/esteakacrownie/Godawful-Volume-Slider/tree/main/build/macos
 > 
 > https://github.com/esteakacrownie/Godawful-Volume-Slider/tree/main/build/web
+>
+> https://github.com/esteakacrownie/Godawful-Volume-Slider/tree/main/build/android
