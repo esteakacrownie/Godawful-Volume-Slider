@@ -1,0 +1,213 @@
+[gd_scene load_steps=14 format=3 uid="uid://8syvpkaex1rm"]
+
+[ext_resource type="Script" uid="uid://b8rmiqrqrrbof" path="res://scripts/fucky_slider.gd" id="1_f7w3b"]
+[ext_resource type="Texture2D" uid="uid://omj1bpwxos4a" path="res://icon.svg" id="1_md1mo"]
+[ext_resource type="AudioStream" uid="uid://bc7bgvx5mbyj2" path="res://assets/sounds/water-sink-loop.wav" id="3_bigdn"]
+
+[sub_resource type="Shader" id="Shader_md1mo"]
+code = "shader_type canvas_item;
+
+uniform vec4 col : source_color;
+uniform float width = 0.6;
+
+void vertex() {
+	if (VERTEX.y > 0.0) {
+		VERTEX.x = (VERTEX.x - 0.5) * width + 0.5;
+	}
+}
+
+void fragment() {
+	COLOR = col;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_f7w3b"]
+shader = SubResource("Shader_md1mo")
+shader_parameter/col = Color(0.58203125, 0.58203125, 0.58203125, 1)
+shader_parameter/width = 0.6
+
+[sub_resource type="Shader" id="Shader_f7w3b"]
+code = "shader_type canvas_item;
+
+uniform vec4 col : source_color;
+uniform vec4 fill_col : source_color;
+uniform float fill_threshold = 0.5;
+uniform float width = 0.6;
+
+void vertex() {
+	if (VERTEX.y > 0.0) {
+		VERTEX.x = (VERTEX.x - 0.5) * width + 0.5;
+	}
+}
+
+void fragment() {
+	COLOR = col;
+	if (1.0-UV.y < fill_threshold) {
+		COLOR = fill_col;
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bigdn"]
+shader = SubResource("Shader_f7w3b")
+shader_parameter/col = Color(0.75, 0.75, 0.75, 1)
+shader_parameter/fill_col = Color(0.14509805, 0.26151964, 0.3019608, 1)
+shader_parameter/fill_threshold = 0.5
+shader_parameter/width = 0.6
+
+[sub_resource type="Shader" id="Shader_bigdn"]
+code = "shader_type canvas_item;
+
+uniform vec4 col : source_color;
+
+void vertex() {
+	// Called for every vertex the material is visible on.
+}
+
+void fragment() {
+	COLOR = col;
+	if (distance(vec2(0.5, 0.5), UV) > 0.5) {COLOR.a = 0.0;}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tanir"]
+shader = SubResource("Shader_bigdn")
+shader_parameter/col = Color(0.14509805, 0.2627451, 0.3019608, 1)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_srtg1"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(8, 0, 1)
+direction = Vector3(0, 1, 0)
+spread = 0.0
+initial_velocity_min = 50.0
+initial_velocity_max = 150.0
+gravity = Vector3(0, 250, 0)
+scale_min = 0.02
+scale_max = 0.099999994
+
+[sub_resource type="Shader" id="Shader_tanir"]
+code = "shader_type canvas_item;
+
+uniform float ext_radius = 0.5;
+uniform float in_radius = 0.35;
+
+void fragment() {
+	float dist = distance(UV, vec2(0.5));
+	COLOR.a =  dist > in_radius && dist < ext_radius ? 1.0 : 0.0;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_srtg1"]
+shader = SubResource("Shader_tanir")
+shader_parameter/ext_radius = 0.5
+shader_parameter/in_radius = 0.35
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_f7w3b"]
+radius = 24.0
+
+[node name="Fucky Slider" type="Node2D"]
+script = ExtResource("1_f7w3b")
+
+[node name="Bucket" type="Sprite2D" parent="."]
+z_index = -1
+material = SubResource("ShaderMaterial_f7w3b")
+texture = ExtResource("1_md1mo")
+
+[node name="inner" type="Sprite2D" parent="Bucket"]
+material = SubResource("ShaderMaterial_bigdn")
+position = Vector2(0, -3.2)
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("1_md1mo")
+
+[node name="drops" type="GPUParticles2D" parent="Bucket"]
+z_index = -1
+material = SubResource("ShaderMaterial_tanir")
+position = Vector2(0, 56)
+amount = 64
+texture = ExtResource("1_md1mo")
+lifetime = 3.0
+process_material = SubResource("ParticleProcessMaterial_srtg1")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(0, -80)
+
+[node name="pipe" type="ColorRect" parent="."]
+offset_left = -16.0
+offset_top = -256.0
+offset_right = 16.0
+offset_bottom = -192.0
+color = Color(0.5803922, 0.5803922, 0.5803922, 1)
+
+[node name="valve" type="ColorRect" parent="pipe"]
+modulate = Color(1, 0.2, 0.3137255, 1)
+material = SubResource("ShaderMaterial_srtg1")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -8.0
+offset_top = 8.0
+offset_right = 8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(24, 24)
+
+[node name="bar" type="ColorRect" parent="pipe/valve"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 20.0
+offset_right = -4.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="bar2" type="ColorRect" parent="pipe/valve"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 44.0
+offset_right = 12.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+rotation = -1.5707964
+
+[node name="button" type="TouchScreenButton" parent="pipe/valve"]
+position = Vector2(24, 24)
+shape = SubResource("CircleShape2D_f7w3b")
+
+[node name="stream" type="ColorRect" parent="pipe"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 32.0
+offset_right = -4.0
+offset_bottom = 249.6
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.14509805, 0.2627451, 0.3019608, 1)
+
+[node name="percent" type="Label" parent="pipe"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -8.0
+offset_top = 240.0
+offset_right = 8.0
+offset_bottom = 199.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 32
+text = "100%"
+horizontal_alignment = 1
+
+[node name="water_sink" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_bigdn")
+autoplay = true
